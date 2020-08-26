@@ -5,37 +5,28 @@
     user     = "vdbm" # $DATABASE_USER
     password = "" # $DATABASE_PASSWORD
 
-    [database.sync]
-        maxIdle = 1
-    [database.backFill]
-        maxIdle = 5
-
 [log]
     level = "debug" # $LOGRUS_LEVEL
 
+[sync]
+    workers = 1 # $SUPERNODE_WORKERS
+
+[backfill]
+    frequency = 45 # $BACKFILL_FREQUENCY
+    batchSize = 1 # $BACKFILL_BATCH_SIZE
+    workers = 5 # $BACKFILL_WORKERS
+    validationLevel = 1 # $BACKFILL_VALIDATION_LEVEL
+    timeout = 300 # $HTTP_TIMEOUT
+
 [resync]
-    chain = "bitcoin" # $RESYNC_CHAIN
     type = "full" # $RESYNC_TYPE
     start = 0 # $RESYNC_START
     stop = 0 # $RESYNC_STOP
-    batchSize = 5 # $RESYNC_BATCH_SIZE
-    batchNumber = 5 # $RESYNC_BATCH_NUMBER
+    batchSize = 1 # $RESYNC_BATCH_SIZE
+    workers = 5 # $RESYNC_WORKERS
+    timeout = 300 # $HTTP_TIMEOUT
     clearOldCache = false # $RESYNC_CLEAR_OLD_CACHE
-    resetValidation = true # $RESYNC_RESET_VALIDATION
-
-[watcher]
-    chain = "bitcoin" # $SUPERNODE_CHAIN
-    server = true # $SUPERNODE_SERVER
-    ipcPath = "~/.vulcanize/vulcanize.ipc" # $SUPERNODE_IPC_PATH
-    wsPath = "127.0.0.1:8082" # $SUPERNODE_WS_PATH
-    httpPath = "127.0.0.1:8083" # $SUPERNODE_HTTP_PATH
-    sync = true # $SUPERNODE_SYNC
-    workers = 1 # $SUPERNODE_WORKERS
-    backFill = true # $SUPERNODE_BACKFILL
-    frequency = 45 # $SUPERNODE_FREQUENCY
-    batchSize = 5 # $SUPERNODE_BATCH_SIZE
-    batchNumber = 5 # $SUPERNODE_BATCH_NUMBER
-    validationLevel = 1 # $SUPERNODE_VALIDATION_LEVEL
+    resetValidation = false # $RESYNC_RESET_VALIDATION
 
 [bitcoin]
     wsPath  = "127.0.0.1:8332" # $BTC_WS_PATH
