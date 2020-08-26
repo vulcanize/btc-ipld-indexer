@@ -19,15 +19,15 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/resync"
-	v "github.com/vulcanize/ipfs-blockchain-watcher/version"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/resync"
+	v "github.com/vulcanize/ipld-btc-indexer/version"
 )
 
 // resyncCmd represents the resync command
 var resyncCmd = &cobra.Command{
 	Use:   "resync",
 	Short: "Resync historical data",
-	Long:  `Use this command to fill in sections of missing data in the ipfs-blockchain-watcher database`,
+	Long:  `Use this command to fill in sections of missing data in the ipld-btc-indexer database`,
 	Run: func(cmd *cobra.Command, args []string) {
 		subCommand = cmd.CalledAs()
 		logWithCommand = *log.WithField("SubCommand", subCommand)
@@ -36,7 +36,7 @@ var resyncCmd = &cobra.Command{
 }
 
 func rsyncCmdCommand() {
-	logWithCommand.Infof("running ipfs-blockchain-watcher version: %s", v.VersionWithMeta)
+	logWithCommand.Infof("running ipld-btc-indexer version: %s", v.VersionWithMeta)
 	logWithCommand.Debug("loading resync configuration variables")
 	rConfig, err := resync.NewConfig()
 	if err != nil {

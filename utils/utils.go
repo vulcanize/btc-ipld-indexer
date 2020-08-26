@@ -23,7 +23,6 @@ import (
 
 	"github.com/vulcanize/ipld-btc-indexer/pkg/node"
 	"github.com/vulcanize/ipld-btc-indexer/pkg/postgres"
-	"github.com/vulcanize/ipld-btc-indexer/pkg/shared"
 )
 
 func LoadPostgres(database postgres.Config, node node.Node) postgres.DB {
@@ -58,31 +57,4 @@ func GetBlockHeightBins(startingBlock, endingBlock, batchSize uint64) ([][]uint6
 		blockRangeBins[i] = blockRange
 	}
 	return blockRangeBins, nil
-}
-
-// MissingHeightsToGaps returns a slice of gaps from a slice of missing block heights
-func MissingHeightsToGaps(heights []uint64) []shared.Gap {
-	if len(heights) == 0 {
-		return nil
-	}
-	validationGaps := make([]shared.Gap, 0)
-	start := heights[0]
-	lastHeight := start
-	for i, height := range heights[1:] {
-		if height != lastHeight+1 {
-			validationGaps = append(validationGaps, shared.Gap{
-				Start: start,
-				Stop:  lastHeight,
-			})
-			start = height
-		}
-		if i+2 == len(heights) {
-			validationGaps = append(validationGaps, shared.Gap{
-				Start: start,
-				Stop:  height,
-			})
-		}
-		lastHeight = height
-	}
-	return validationGaps
 }

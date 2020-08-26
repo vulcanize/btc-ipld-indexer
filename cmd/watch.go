@@ -25,17 +25,17 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	h "github.com/vulcanize/ipfs-blockchain-watcher/pkg/historical"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/shared"
-	w "github.com/vulcanize/ipfs-blockchain-watcher/pkg/watch"
-	v "github.com/vulcanize/ipfs-blockchain-watcher/version"
+	h "github.com/vulcanize/ipld-btc-indexer/pkg/historical"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/shared"
+	w "github.com/vulcanize/ipld-btc-indexer/pkg/watch"
+	v "github.com/vulcanize/ipld-btc-indexer/version"
 )
 
 // watchCmd represents the watch command
 var watchCmd = &cobra.Command{
 	Use:   "watch",
 	Short: "sync chain data into PG-IPFS",
-	Long: `This command configures a VulcanizeDB ipfs-blockchain-watcher.
+	Long: `This command configures a VulcanizeDB ipld-btc-indexer.
 
 The Sync process streams all chain data from the appropriate chain, processes this data into IPLD objects
 and publishes them to IPFS. It then indexes the CIDs against useful data fields/metadata in Postgres. 
@@ -54,7 +54,7 @@ and fill in gaps in the data
 }
 
 func watch() {
-	logWithCommand.Infof("running ipfs-blockchain-watcher version: %s", v.VersionWithMeta)
+	logWithCommand.Infof("running ipld-btc-indexer version: %s", v.VersionWithMeta)
 
 	var forwardPayloadChan chan shared.ConvertedData
 	wg := new(s.WaitGroup)

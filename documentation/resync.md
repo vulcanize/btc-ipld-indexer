@@ -1,5 +1,5 @@
-## ipfs-blockchain-watcher resync
-The `resync` command is made available for directing the resyncing of ipfs-blockchain-watcherdata within specified ranges.
+## ipld-btc-indexer resync
+The `resync` command is made available for directing the resyncing of ipld-btc-indexerdata within specified ranges.
 It also contains a utility for cleaning out old data, and resetting the validation level of data.
 
 ### Rational
@@ -8,15 +8,15 @@ Manual resyncing of data can be used to re-validate data within specific ranges 
 
 Option to remove data may be needed for bad/deprecated data or to prepare for breaking changes to the db schemas.
 
-Resetting the validation level of data is useful for designating ranges of data for resyncing by an ongoing ipfs-blockchain-watcher
+Resetting the validation level of data is useful for designating ranges of data for resyncing by an ongoing ipld-btc-indexer
 backfill process.
 
 ### Command
 
-Usage: `./ipfs-blockchain-watcher resync --config={config.toml}`
+Usage: `./ipld-btc-indexer resync --config={config.toml}`
 
 Configuration can also be done through CLI options and/or environmental variables.
-CLI options can be found using `./ipfs-blockchain-watcher resync --help`.
+CLI options can be found using `./ipld-btc-indexer resync --help`.
 
 ### Config
 

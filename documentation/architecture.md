@@ -1,4 +1,4 @@
-# ipfs-blockchain-watcher architecture
+# ipld-btc-indexer architecture
 1. [Processes](#processes)
 1. [Command](#command)
 1. [Configuration](#config)
@@ -8,7 +8,7 @@
 1. [IPFS Considerations](#ipfs-considerations)
 
 ## Processes
-ipfs-blockchain-watcher is a [service](../pkg/watch/service.go#L61) comprised of the following interfaces:
+ipld-btc-indexer is a [service](../pkg/watch/service.go#L61) comprised of the following interfaces:
 
 * [Payload Fetcher](../pkg/shared/interfaces.go#L29): Fetches raw chain data from a half-duplex endpoint (HTTP/IPC), used for historical data fetching. ([BTC](../pkg/btc/payload_fetcher.go), [ETH](../pkg/eth/payload_fetcher.go)).
 * [Payload Streamer](../pkg/shared/interfaces.go#L24): Streams raw chain data from a full-duplex endpoint (WebSocket/IPC), used for syncing data at the head of the chain in real-time. ([BTC](../pkg/btc/http_streamer.go), [ETH](../pkg/eth/streamer.go)).
@@ -27,21 +27,21 @@ the specifics of that chain.
 The service uses these interfaces to operate in any combination of three modes: `sync`, `serve`, and `backfill`.
 * Sync: Streams raw chain data at the head, converts and publishes it to IPFS, and indexes the resulting set of CIDs in Postgres with useful metadata.
 * BackFill: Automatically searches for and detects gaps in the DB; fetches, converts, publishes, and indexes the data to fill these gaps.
-* Serve: Opens up IPC, HTTP, and WebSocket servers on top of the ipfs-blockchain-watcher DB and any concurrent sync and/or backfill processes.
+* Serve: Opens up IPC, HTTP, and WebSocket servers on top of the ipld-btc-indexer DB and any concurrent sync and/or backfill processes.
 
 
 These three modes are all operated through a single vulcanizeDB command: `watch`
 
 ## Command
 
-Usage: `./ipfs-blockchain-watcher watch --config={config.toml}`
+Usage: `./ipld-btc-indexer watch --config={config.toml}`
 
 Configuration can also be done through CLI options and/or environmental variables.
-CLI options can be found using `./ipfs-blockchain-watcher watch --help`.
+CLI options can be found using `./ipld-btc-indexer watch --help`.
 
 ## Config
 
-Below is the set of universal config parameters for the ipfs-blockchain-watcher command, in .toml form, with the respective environmental variables commented to the side.
+Below is the set of universal config parameters for the ipld-btc-indexer command, in .toml form, with the respective environmental variables commented to the side.
 This set of parameters needs to be set no matter the chain type.
 
 ```toml
@@ -98,7 +98,7 @@ For Ethereum:
 
 ## Database
 
-Currently, ipfs-blockchain-watcher persists all data to a single Postgres database. The migrations for this DB can be found [here](../db/migrations).
+Currently, ipld-btc-indexer persists all data to a single Postgres database. The migrations for this DB can be found [here](../db/migrations).
 Chain-specific data is populated under a chain-specific schema (e.g. `eth` and `btc`) while shared data- such as the IPFS blocks table- is populated under the `public` schema.
 Subsequent watchers which act on the raw chain data should build and populate their own schemas or separate databases entirely.
 
@@ -109,7 +109,7 @@ conflicts between watcher db migrations.
 
 ## APIs
 
-ipfs-blockchain-watcher provides mutliple types of APIs by which to interface with its data.
+ipld-btc-indexer provides mutliple types of APIs by which to interface with its data.
 More detailed information on the APIs can be found [here](apis.md).
 
 ## Resync
