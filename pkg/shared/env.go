@@ -21,7 +21,7 @@ import (
 
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/spf13/viper"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/node"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/node"
 )
 
 // Env variables

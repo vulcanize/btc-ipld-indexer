@@ -21,13 +21,12 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/config"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/node"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/postgres"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/shared"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/node"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/postgres"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/shared"
 )
 
-func LoadPostgres(database config.Database, node node.Node) postgres.DB {
+func LoadPostgres(database postgres.Config, node node.Node) postgres.DB {
 	db, err := postgres.NewDB(database, node)
 	if err != nil {
 		logrus.Fatal("Error loading postgres: ", err)

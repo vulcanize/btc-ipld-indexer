@@ -18,17 +18,14 @@ package btc
 
 import (
 	"encoding/hex"
-	"fmt"
 
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/txscript"
-
-	"github.com/vulcanize/ipld-btc-indexer/pkg/shared"
 )
 
 // Converter interface for substituting mocks in tests
 type Converter interface {
-	Convert(payload shared.RawChainData) (shared.ConvertedData, error)
+	Convert(payload BlockPayload) (*ConvertedPayload, error)
 }
 
 // PayloadConverter satisfies the PayloadConverter interface for bitcoin
@@ -45,13 +42,9 @@ func NewPayloadConverter(chainConfig *chaincfg.Params) *PayloadConverter {
 
 // Convert method is used to convert a bitcoin BlockPayload to an IPLDPayload
 // Satisfies the shared.PayloadConverter interface
-func (pc *PayloadConverter) Convert(payload shared.RawChainData) (shared.ConvertedData, error) {
-	btcBlockPayload, ok := payload.(BlockPayload)
-	if !ok {
-		return nil, fmt.Errorf("btc converter: expected payload type %T got %T", BlockPayload{}, payload)
-	}
-	txMeta := make([]TxModelWithInsAndOuts, len(btcBlockPayload.Txs))
-	for i, tx := range btcBlockPayload.Txs {
+func (pc *PayloadConverter) Convert(payload BlockPayload) (*ConvertedPayload, error) {
+	txMeta := make([]TxModelWithInsAndOuts, len(payload.Txs))
+	for i, tx := range payload.Txs {
 		txModel := TxModelWithInsAndOuts{
 			TxHash:    tx.Hash().String(),
 			Index:     int64(i),
@@ -92,8 +85,8 @@ func (pc *PayloadConverter) Convert(payload shared.RawChainData) (shared.Convert
 		}
 		txMeta[i] = txModel
 	}
-	return ConvertedPayload{
-		BlockPayload: btcBlockPayload,
+	return &ConvertedPayload{
+		BlockPayload: payload,
 		TxMetaData:   txMeta,
 	}, nil
 }

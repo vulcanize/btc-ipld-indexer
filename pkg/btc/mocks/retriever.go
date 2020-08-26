@@ -17,22 +17,16 @@
 package mocks
 
 import (
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/postgres"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/shared"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/btc"
 )
 
 // CIDRetriever is a mock CID retriever for use in tests
 type CIDRetriever struct {
-	GapsToRetrieve              []shared.Gap
+	GapsToRetrieve              []btc.DBGap
 	GapsToRetrieveErr           error
 	CalledTimes                 int
 	FirstBlockNumberToReturn    int64
 	RetrieveFirstBlockNumberErr error
-}
-
-// RetrieveCIDs mock method
-func (*CIDRetriever) Retrieve(filter shared.SubscriptionSettings, blockNumber int64) ([]shared.CIDsForFetching, bool, error) {
-	panic("implement me")
 }
 
 // RetrieveLastBlockNumber mock method
@@ -46,19 +40,15 @@ func (mcr *CIDRetriever) RetrieveFirstBlockNumber() (int64, error) {
 }
 
 // RetrieveGapsInData mock method
-func (mcr *CIDRetriever) RetrieveGapsInData(int) ([]shared.Gap, error) {
+func (mcr *CIDRetriever) RetrieveGapsInData(int) ([]btc.DBGap, error) {
 	mcr.CalledTimes++
 	return mcr.GapsToRetrieve, mcr.GapsToRetrieveErr
 }
 
 // SetGapsToRetrieve mock method
-func (mcr *CIDRetriever) SetGapsToRetrieve(gaps []shared.Gap) {
+func (mcr *CIDRetriever) SetGapsToRetrieve(gaps []btc.DBGap) {
 	if mcr.GapsToRetrieve == nil {
-		mcr.GapsToRetrieve = make([]shared.Gap, 0)
+		mcr.GapsToRetrieve = make([]btc.DBGap, 0)
 	}
 	mcr.GapsToRetrieve = append(mcr.GapsToRetrieve, gaps...)
-}
-
-func (mcr *CIDRetriever) Database() *postgres.DB {
-	panic("implement me")
 }

@@ -20,25 +20,25 @@ import (
 	"errors"
 	"sync/atomic"
 
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/shared"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/btc"
 )
 
 // PayloadFetcher mock for tests
 type PayloadFetcher struct {
-	PayloadsToReturn     map[uint64]shared.RawChainData
+	PayloadsToReturn     map[uint64]btc.BlockPayload
 	FetchErrs            map[uint64]error
 	CalledAtBlockHeights [][]uint64
 	CalledTimes          int64
 }
 
 // FetchAt mock method
-func (fetcher *PayloadFetcher) FetchAt(blockHeights []uint64) ([]shared.RawChainData, error) {
+func (fetcher *PayloadFetcher) FetchAt(blockHeights []uint64) ([]btc.BlockPayload, error) {
 	if fetcher.PayloadsToReturn == nil {
 		return nil, errors.New("mock StateDiffFetcher needs to be initialized with payloads to return")
 	}
 	atomic.AddInt64(&fetcher.CalledTimes, 1) // thread-safe increment
 	fetcher.CalledAtBlockHeights = append(fetcher.CalledAtBlockHeights, blockHeights)
-	results := make([]shared.RawChainData, 0, len(blockHeights))
+	results := make([]btc.BlockPayload, 0, len(blockHeights))
 	for _, height := range blockHeights {
 		results = append(results, fetcher.PayloadsToReturn[height])
 		err, ok := fetcher.FetchErrs[height]

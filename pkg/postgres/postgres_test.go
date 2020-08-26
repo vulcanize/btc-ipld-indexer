@@ -18,19 +18,17 @@ package postgres_test
 
 import (
 	"fmt"
-	"strings"
-
 	"math/big"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/config"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/node"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/postgres"
-	"github.com/vulcanize/ipfs-blockchain-watcher/test_config"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/node"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/postgres"
+	"github.com/vulcanize/ipld-btc-indexer/test_config"
 )
 
 var _ = Describe("Postgres DB", func() {
@@ -38,7 +36,7 @@ var _ = Describe("Postgres DB", func() {
 
 	It("connects to the database", func() {
 		var err error
-		pgConfig := config.DbConnectionString(test_config.DBConfig)
+		pgConfig := postgres.DbConnectionString(test_config.DBConfig)
 
 		sqlxdb, err = sqlx.Connect("postgres", pgConfig)
 
@@ -54,7 +52,7 @@ var _ = Describe("Postgres DB", func() {
 		// sized int, so use string representation of big.Int
 		// and cast on insert
 
-		pgConnectString := config.DbConnectionString(test_config.DBConfig)
+		pgConnectString := postgres.DbConnectionString(test_config.DBConfig)
 		db, err := sqlx.Connect("postgres", pgConnectString)
 		Expect(err).NotTo(HaveOccurred())
 
@@ -83,7 +81,7 @@ var _ = Describe("Postgres DB", func() {
 	})
 
 	It("throws error when can't connect to the database", func() {
-		invalidDatabase := config.Database{}
+		invalidDatabase := postgres.Config{}
 		node := node.Node{GenesisBlock: "GENESIS", NetworkID: "1", ID: "x123", ClientName: "geth"}
 
 		_, err := postgres.NewDB(invalidDatabase, node)

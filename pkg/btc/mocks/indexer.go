@@ -17,24 +17,17 @@
 package mocks
 
 import (
-	"fmt"
-
 	"github.com/vulcanize/ipld-btc-indexer/pkg/btc"
-	"github.com/vulcanize/ipld-btc-indexer/pkg/shared"
 )
 
 // CIDIndexer is the underlying struct for the Indexer interface
 type CIDIndexer struct {
-	PassedCIDPayload []*btc.CIDPayload
+	PassedCIDPayload []btc.CIDPayload
 	ReturnErr        error
 }
 
 // Index indexes a cidPayload in Postgres
-func (repo *CIDIndexer) Index(cids shared.CIDsForIndexing) error {
-	cidPayload, ok := cids.(*btc.CIDPayload)
-	if !ok {
-		return fmt.Errorf("index expected cids type %T got %T", &btc.CIDPayload{}, cids)
-	}
-	repo.PassedCIDPayload = append(repo.PassedCIDPayload, cidPayload)
+func (repo *CIDIndexer) Index(cids btc.CIDPayload) error {
+	repo.PassedCIDPayload = append(repo.PassedCIDPayload, cids)
 	return repo.ReturnErr
 }

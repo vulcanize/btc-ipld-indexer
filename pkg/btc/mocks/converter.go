@@ -20,41 +20,32 @@ import (
 	"fmt"
 
 	"github.com/vulcanize/ipld-btc-indexer/pkg/btc"
-	"github.com/vulcanize/ipld-btc-indexer/pkg/shared"
 )
 
 // PayloadConverter is the underlying struct for the Converter interface
 type PayloadConverter struct {
 	PassedStatediffPayload btc.BlockPayload
-	ReturnIPLDPayload      btc.ConvertedPayload
+	ReturnIPLDPayload      *btc.ConvertedPayload
 	ReturnErr              error
 }
 
 // Convert method is used to convert a geth statediff.Payload to a IPLDPayload
-func (pc *PayloadConverter) Convert(payload shared.RawChainData) (shared.ConvertedData, error) {
-	stateDiffPayload, ok := payload.(btc.BlockPayload)
-	if !ok {
-		return nil, fmt.Errorf("convert expected payload type %T got %T", btc.BlockPayload{}, payload)
-	}
-	pc.PassedStatediffPayload = stateDiffPayload
+func (pc *PayloadConverter) Convert(payload btc.BlockPayload) (*btc.ConvertedPayload, error) {
+	pc.PassedStatediffPayload = payload
 	return pc.ReturnIPLDPayload, pc.ReturnErr
 }
 
 // IterativePayloadConverter is the underlying struct for the Converter interface
 type IterativePayloadConverter struct {
 	PassedStatediffPayload []btc.BlockPayload
-	ReturnIPLDPayload      []btc.ConvertedPayload
+	ReturnIPLDPayload      []*btc.ConvertedPayload
 	ReturnErr              error
 	iteration              int
 }
 
 // Convert method is used to convert a geth statediff.Payload to a IPLDPayload
-func (pc *IterativePayloadConverter) Convert(payload shared.RawChainData) (shared.ConvertedData, error) {
-	stateDiffPayload, ok := payload.(btc.BlockPayload)
-	if !ok {
-		return nil, fmt.Errorf("convert expected payload type %T got %T", btc.BlockPayload{}, payload)
-	}
-	pc.PassedStatediffPayload = append(pc.PassedStatediffPayload, stateDiffPayload)
+func (pc *IterativePayloadConverter) Convert(payload btc.BlockPayload) (*btc.ConvertedPayload, error) {
+	pc.PassedStatediffPayload = append(pc.PassedStatediffPayload, payload)
 	if len(pc.PassedStatediffPayload) < pc.iteration+1 {
 		return nil, fmt.Errorf("IterativePayloadConverter does not have a payload to return at iteration %d", pc.iteration)
 	}

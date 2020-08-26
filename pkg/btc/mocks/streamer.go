@@ -14,24 +14,29 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package watch
+package mocks
 
-import log "github.com/sirupsen/logrus"
+import (
+	"github.com/vulcanize/ipld-btc-indexer/pkg/btc"
+)
 
-func sendNonBlockingErr(sub Subscription, err error) {
-	log.Error(err)
-	select {
-	case sub.PayloadChan <- SubscriptionPayload{Data: nil, Err: err.Error(), Flag: EmptyFlag}:
-	default:
-		log.Infof("unable to send error to subscription %s", sub.ID)
-	}
+// PayloadStreamer mock struct
+type PayloadStreamer struct {
+	PassedPayloadChan chan btc.BlockPayload
+	ReturnSub         *btc.ClientSubscription
+	ReturnErr         error
+	StreamPayloads    []btc.BlockPayload
 }
 
-func sendNonBlockingQuit(sub Subscription) {
-	select {
-	case sub.QuitChan <- true:
-		log.Infof("closing subscription %s", sub.ID)
-	default:
-		log.Infof("unable to close subscription %s; channel has no receiver", sub.ID)
-	}
+// Stream mock method
+func (sds *PayloadStreamer) Stream(payloadChan chan btc.BlockPayload) (*btc.ClientSubscription, error) {
+	sds.PassedPayloadChan = payloadChan
+
+	go func() {
+		for _, payload := range sds.StreamPayloads {
+			sds.PassedPayloadChan <- payload
+		}
+	}()
+
+	return sds.ReturnSub, sds.ReturnErr
 }
