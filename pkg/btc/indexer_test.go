@@ -20,10 +20,10 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/btc"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/btc/mocks"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/postgres"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/shared"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/btc"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/btc/mocks"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/postgres"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/shared"
 )
 
 var _ = Describe("Indexer", func() {
@@ -50,7 +50,7 @@ var _ = Describe("Indexer", func() {
 	Describe("Index", func() {
 		It("Indexes CIDs and related metadata into vulcanizedb", func() {
 
-			err = repo.Index(&mocks.MockCIDPayload)
+			err = repo.Index(mocks.MockCIDPayload)
 			Expect(err).ToNot(HaveOccurred())
 			pgStr := `SELECT * FROM btc.header_cids
 				WHERE block_number = $1`

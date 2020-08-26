@@ -21,8 +21,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/btc"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/btc/mocks"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/btc"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/btc/mocks"
 )
 
 var _ = Describe("Converter", func() {

@@ -25,12 +25,12 @@ import (
 	"github.com/multiformats/go-multihash"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/ipfs/ipld"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/ipfs/ipld"
 
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/btc"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/btc/mocks"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/postgres"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/shared"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/btc"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/btc/mocks"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/postgres"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/shared"
 )
 
 var _ = Describe("PublishAndIndexer", func() {

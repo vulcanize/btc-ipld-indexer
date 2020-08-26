@@ -23,9 +23,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/btc"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/postgres"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/shared"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/btc"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/postgres"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/shared"
 )
 
 var (
@@ -137,14 +137,14 @@ var _ = Describe("Cleaner", func() {
 	var (
 		db      *postgres.DB
 		repo    *btc.CIDIndexer
-		cleaner *btc.Cleaner
+		cleaner *btc.DBCleaner
 	)
 	BeforeEach(func() {
 		var err error
 		db, err = shared.SetupDB()
 		Expect(err).ToNot(HaveOccurred())
 		repo = btc.NewCIDIndexer(db)
-		cleaner = btc.NewCleaner(db)
+		cleaner = btc.NewDBCleaner(db)
 	})
 
 	Describe("Clean", func() {

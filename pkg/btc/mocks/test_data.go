@@ -25,8 +25,8 @@ import (
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/btc"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/shared"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/btc"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/shared"
 )
 
 var (

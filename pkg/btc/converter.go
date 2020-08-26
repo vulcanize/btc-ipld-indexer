@@ -23,8 +23,13 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/txscript"
 
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/shared"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/shared"
 )
+
+// Converter interface for substituting mocks in tests
+type Converter interface {
+	Convert(payload shared.RawChainData) (shared.ConvertedData, error)
+}
 
 // PayloadConverter satisfies the PayloadConverter interface for bitcoin
 type PayloadConverter struct {
