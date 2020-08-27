@@ -28,7 +28,7 @@ import (
 
 // Indexer interface for substituting mocks in tests
 type Indexer interface {
-	Index(cids shared.CIDsForIndexing) error
+	Index(cids CIDPayload) error
 }
 
 type CIDIndexer struct {

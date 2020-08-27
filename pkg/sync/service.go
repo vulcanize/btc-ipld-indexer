@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package watch
+package sync
 
 import (
 	"sync"
@@ -77,8 +77,8 @@ type Service struct {
 	serveWg *sync.WaitGroup
 }
 
-// NewIndexer creates a new Indexer using an underlying Service struct
-func NewIndexer(settings *Config) (Indexer, error) {
+// NewIndexerService creates a new Indexer using an underlying Service struct
+func NewIndexerService(settings *Config) (Indexer, error) {
 	sn := new(Service)
 	sn.Streamer = btc.NewHTTPPayloadStreamer(settings.ClientConfig)
 	sn.ChainConfig = &chaincfg.Params{} /// TODO make this configurable

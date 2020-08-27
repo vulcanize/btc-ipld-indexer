@@ -17,7 +17,6 @@
 package shared
 
 import (
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ipfs/go-cid"
 	"github.com/ipfs/go-ipfs-blockstore"
 	"github.com/ipfs/go-ipfs-ds-help"
@@ -26,22 +25,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/vulcanize/ipld-btc-indexer/pkg/ipfs/ipld"
 )
-
-// HandleZeroAddrPointer will return an emtpy string for a nil address pointer
-func HandleZeroAddrPointer(to *common.Address) string {
-	if to == nil {
-		return ""
-	}
-	return to.Hex()
-}
-
-// HandleZeroAddr will return an empty string for a 0 value address
-func HandleZeroAddr(to common.Address) string {
-	if to.Hex() == "0x0000000000000000000000000000000000000000" {
-		return ""
-	}
-	return to.Hex()
-}
 
 // Rollback sql transaction and log any error
 func Rollback(tx *sqlx.Tx) {

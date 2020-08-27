@@ -153,9 +153,9 @@ var _ = Describe("Cleaner", func() {
 				_, err := db.Exec(`INSERT INTO public.blocks (key, data) VALUES ($1, $2)`, key, mockData)
 				Expect(err).ToNot(HaveOccurred())
 			}
-			err := repo.Index(mockCIDPayload1)
+			err := repo.Index(*mockCIDPayload1)
 			Expect(err).ToNot(HaveOccurred())
-			err = repo.Index(mockCIDPayload2)
+			err = repo.Index(*mockCIDPayload2)
 			Expect(err).ToNot(HaveOccurred())
 
 			tx, err := db.Beginx()
@@ -300,11 +300,10 @@ var _ = Describe("Cleaner", func() {
 				Expect(err).ToNot(HaveOccurred())
 			}
 
-			err := repo.Index(mockCIDPayload1)
+			err := repo.Index(*mockCIDPayload1)
 			Expect(err).ToNot(HaveOccurred())
-			err = repo.Index(mockCIDPayload2)
+			err = repo.Index(*mockCIDPayload2)
 			Expect(err).ToNot(HaveOccurred())
-
 			var validationTimes []int
 			pgStr := `SELECT times_validated FROM btc.header_cids`
 			err = db.Select(&validationTimes, pgStr)
@@ -313,7 +312,7 @@ var _ = Describe("Cleaner", func() {
 			Expect(validationTimes[0]).To(Equal(1))
 			Expect(validationTimes[1]).To(Equal(1))
 
-			err = repo.Index(mockCIDPayload1)
+			err = repo.Index(*mockCIDPayload1)
 			Expect(err).ToNot(HaveOccurred())
 
 			validationTimes = []int{}
@@ -339,7 +338,7 @@ var _ = Describe("Cleaner", func() {
 			Expect(validationTimes[0]).To(Equal(0))
 			Expect(validationTimes[1]).To(Equal(0))
 
-			err = repo.Index(mockCIDPayload2)
+			err = repo.Index(*mockCIDPayload2)
 			Expect(err).ToNot(HaveOccurred())
 
 			validationTimes = []int{}

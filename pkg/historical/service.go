@@ -99,7 +99,7 @@ func (bfs *Service) Sync(wg *sync.WaitGroup) {
 			case <-ticker.C:
 				gaps, err := bfs.Retriever.RetrieveGapsInData(bfs.validationLevel)
 				if err != nil {
-					log.Errorf("ethereum backFill gap retrieval error: %v", err)
+					log.Errorf("bitcoin backFill gap retrieval error: %v", err)
 					continue
 				}
 				// spin up worker goroutines for this search pass

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package watch
+package sync
 
 import (
 	"github.com/btcsuite/btcd/rpcclient"
@@ -51,7 +51,7 @@ func NewConfig() *Config {
 	viper.BindEnv("sync.workers", SUPERNODE_WORKERS)
 	viper.BindEnv("bitcoin.wsPath", shared.BTC_WS_PATH)
 
-	workers := viper.GetInt("sync.workers")
+	workers := viper.GetInt64("sync.workers")
 	if workers < 1 {
 		workers = 1
 	}

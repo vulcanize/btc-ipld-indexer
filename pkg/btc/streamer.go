@@ -21,8 +21,6 @@ import (
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
 	"github.com/sirupsen/logrus"
-
-	"github.com/vulcanize/ipld-btc-indexer/pkg/shared"
 )
 
 const (
@@ -43,7 +41,7 @@ func NewWSPayloadStreamer(clientConfig *rpcclient.ConnConfig) *WSPayloadStreamer
 
 // Stream is the main loop for subscribing to data from the btc block notifications
 // This only works against btcd's websocket endpoints
-func (ps *WSPayloadStreamer) Stream(payloadChan chan shared.RawChainData) (*ClientSubscription, error) {
+func (ps *WSPayloadStreamer) Stream(payloadChan chan BlockPayload) (*ClientSubscription, error) {
 	logrus.Info("streaming block payloads from btc")
 	blockNotificationHandler := rpcclient.NotificationHandlers{
 		// Notification handler for block connections, forwards new block data to the payloadChan

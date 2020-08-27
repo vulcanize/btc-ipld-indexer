@@ -17,8 +17,6 @@
 package shared
 
 import (
-	"github.com/ethereum/go-ethereum/rpc"
-
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/spf13/viper"
 	"github.com/vulcanize/ipld-btc-indexer/pkg/node"
@@ -27,14 +25,6 @@ import (
 // Env variables
 const (
 	HTTP_TIMEOUT = "HTTP_TIMEOUT"
-
-	ETH_WS_PATH       = "ETH_WS_PATH"
-	ETH_HTTP_PATH     = "ETH_HTTP_PATH"
-	ETH_NODE_ID       = "ETH_NODE_ID"
-	ETH_CLIENT_NAME   = "ETH_CLIENT_NAME"
-	ETH_GENESIS_BLOCK = "ETH_GENESIS_BLOCK"
-	ETH_NETWORK_ID    = "ETH_NETWORK_ID"
-	ETH_CHAIN_ID      = "ETH_CHAIN_ID"
 
 	BTC_WS_PATH       = "BTC_WS_PATH"
 	BTC_HTTP_PATH     = "BTC_HTTP_PATH"
@@ -46,27 +36,6 @@ const (
 	BTC_NETWORK_ID    = "BTC_NETWORK_ID"
 	BTC_CHAIN_ID      = "BTC_CHAIN_ID"
 )
-
-// GetEthNodeAndClient returns eth node info and client from path url
-func GetEthNodeAndClient(path string) (node.Node, *rpc.Client, error) {
-	viper.BindEnv("ethereum.nodeID", ETH_NODE_ID)
-	viper.BindEnv("ethereum.clientName", ETH_CLIENT_NAME)
-	viper.BindEnv("ethereum.genesisBlock", ETH_GENESIS_BLOCK)
-	viper.BindEnv("ethereum.networkID", ETH_NETWORK_ID)
-	viper.BindEnv("ethereum.chainID", ETH_CHAIN_ID)
-
-	rpcClient, err := rpc.Dial(path)
-	if err != nil {
-		return node.Node{}, nil, err
-	}
-	return node.Node{
-		ID:           viper.GetString("ethereum.nodeID"),
-		ClientName:   viper.GetString("ethereum.clientName"),
-		GenesisBlock: viper.GetString("ethereum.genesisBlock"),
-		NetworkID:    viper.GetString("ethereum.networkID"),
-		ChainID:      viper.GetUint64("ethereum.chainID"),
-	}, rpcClient, nil
-}
 
 // GetBtcNodeAndClient returns btc node info from path url
 func GetBtcNodeAndClient(path string) (node.Node, *rpcclient.ConnConfig) {
