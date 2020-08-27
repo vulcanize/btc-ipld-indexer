@@ -38,7 +38,7 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
-	log.Info("----- Starting IPFS blockchain watcher -----")
+	log.Info("----- Starting ipld-btc-indexer -----")
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err)
 	}
@@ -83,23 +83,39 @@ func init() {
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
 
+	// flags
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file location")
-	rootCmd.PersistentFlags().String("logfile", "", "file path for logging")
+
 	rootCmd.PersistentFlags().String("database-name", "vulcanize_public", "database name")
 	rootCmd.PersistentFlags().Int("database-port", 5432, "database port")
 	rootCmd.PersistentFlags().String("database-hostname", "localhost", "database hostname")
 	rootCmd.PersistentFlags().String("database-user", "", "database user")
 	rootCmd.PersistentFlags().String("database-password", "", "database password")
-	rootCmd.PersistentFlags().String("client-ipcPath", "", "location of geth.ipc file")
-	rootCmd.PersistentFlags().String("log-level", log.InfoLevel.String(), "Log level (trace, debug, info, warn, error, fatal, panic")
 
-	viper.BindPFlag("logfile", rootCmd.PersistentFlags().Lookup("logfile"))
+	rootCmd.PersistentFlags().String("log-level", log.InfoLevel.String(), "Log level (trace, debug, info, warn, error, fatal, panic")
+	rootCmd.PersistentFlags().String("logfile", "", "file path for logging")
+
+	rootCmd.PersistentFlags().String("btc-node-id", "", "btc node id")
+	rootCmd.PersistentFlags().String("btc-client-name", "", "btc client name")
+	rootCmd.PersistentFlags().String("btc-genesis-block", "", "btc genesis block hash")
+	rootCmd.PersistentFlags().String("btc-network-id", "", "btc network id")
+	rootCmd.PersistentFlags().String("btc-chain-id", "", "btc chain id")
+
+	// and their .toml config bindings
 	viper.BindPFlag("database.name", rootCmd.PersistentFlags().Lookup("database-name"))
 	viper.BindPFlag("database.port", rootCmd.PersistentFlags().Lookup("database-port"))
 	viper.BindPFlag("database.hostname", rootCmd.PersistentFlags().Lookup("database-hostname"))
 	viper.BindPFlag("database.user", rootCmd.PersistentFlags().Lookup("database-user"))
 	viper.BindPFlag("database.password", rootCmd.PersistentFlags().Lookup("database-password"))
+
+	viper.BindPFlag("logfile", rootCmd.PersistentFlags().Lookup("logfile"))
 	viper.BindPFlag("log.level", rootCmd.PersistentFlags().Lookup("log-level"))
+
+	viper.BindPFlag("bitcoin.nodeID", backfillCmd.PersistentFlags().Lookup("btc-node-id"))
+	viper.BindPFlag("bitcoin.clientName", backfillCmd.PersistentFlags().Lookup("btc-client-name"))
+	viper.BindPFlag("bitcoin.genesisBlock", backfillCmd.PersistentFlags().Lookup("btc-genesis-block"))
+	viper.BindPFlag("bitcoin.networkID", backfillCmd.PersistentFlags().Lookup("btc-network-id"))
+	viper.BindPFlag("bitcoin.chainID", backfillCmd.PersistentFlags().Lookup("btc-chain-id"))
 }
 
 func initConfig() {
