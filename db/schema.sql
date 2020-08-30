@@ -341,19 +341,19 @@ ALTER TABLE ONLY btc.header_cids
 
 
 --
+-- Name: transaction_cids transaction_cids_header_id_tx_hash_key; Type: CONSTRAINT; Schema: btc; Owner: -
+--
+
+ALTER TABLE ONLY btc.transaction_cids
+    ADD CONSTRAINT transaction_cids_header_id_tx_hash_key UNIQUE (header_id, tx_hash);
+
+
+--
 -- Name: transaction_cids transaction_cids_pkey; Type: CONSTRAINT; Schema: btc; Owner: -
 --
 
 ALTER TABLE ONLY btc.transaction_cids
     ADD CONSTRAINT transaction_cids_pkey PRIMARY KEY (id);
-
-
---
--- Name: transaction_cids transaction_cids_tx_hash_key; Type: CONSTRAINT; Schema: btc; Owner: -
---
-
-ALTER TABLE ONLY btc.transaction_cids
-    ADD CONSTRAINT transaction_cids_tx_hash_key UNIQUE (tx_hash);
 
 
 --

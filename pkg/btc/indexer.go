@@ -107,7 +107,7 @@ func (in *CIDIndexer) indexTransactionCID(tx *sqlx.Tx, transaction TxModelWithIn
 	var txID int64
 	err := tx.QueryRowx(`INSERT INTO btc.transaction_cids (header_id, tx_hash, index, cid, segwit, witness_hash, mh_key)
 							VALUES ($1, $2, $3, $4, $5, $6, $7)
-							ON CONFLICT (tx_hash) DO UPDATE SET (header_id, index, cid, segwit, witness_hash, mh_key) = ($1, $3, $4, $5, $6, $7)
+							ON CONFLICT (header_id, tx_hash) DO UPDATE SET (index, cid, segwit, witness_hash, mh_key) = ($3, $4, $5, $6, $7)
 							RETURNING id`,
 		headerID, transaction.TxHash, transaction.Index, transaction.CID, transaction.SegWit, transaction.WitnessHash, transaction.MhKey).Scan(&txID)
 	return txID, err
