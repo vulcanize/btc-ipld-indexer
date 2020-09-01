@@ -27,7 +27,6 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/vulcanize/ipld-btc-indexer/pkg/node"
 	"github.com/vulcanize/ipld-btc-indexer/pkg/postgres"
 	"github.com/vulcanize/ipld-btc-indexer/pkg/shared"
 )
@@ -43,8 +42,6 @@ type Indexer interface {
 	ethnode.Service
 	// Data processing event loop
 	Sync(wg *sync.WaitGroup) error
-	// Method to access the node info for the service
-	Node() *node.Node
 	// Method to access chain type
 	Chain() shared.ChainType
 }
@@ -65,8 +62,6 @@ type Service struct {
 	PayloadChan chan btc.BlockPayload
 	// Used to signal shutdown of the service
 	QuitChan chan bool
-	// Info for the Geth node that this watcher is working with
-	NodeInfo *node.Node
 	// Number of worker goroutines
 	Workers int64
 	// chain type for this service
@@ -88,7 +83,6 @@ func NewIndexerService(settings *Config) (Indexer, error) {
 
 	sn.QuitChan = make(chan bool)
 	sn.Workers = settings.Workers
-	sn.NodeInfo = &settings.NodeInfo
 	return sn, nil
 }
 
@@ -184,11 +178,6 @@ func (sap *Service) Stop() error {
 	close(sap.QuitChan)
 	sap.Unlock()
 	return nil
-}
-
-// Node returns the node info for this service
-func (sap *Service) Node() *node.Node {
-	return sap.NodeInfo
 }
 
 // Chain returns the chain type for this service
