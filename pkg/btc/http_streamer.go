@@ -22,11 +22,15 @@ import (
 
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/sirupsen/logrus"
-
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/shared"
 )
 
-// HTTPPayloadStreamer satisfies the PayloadStreamer interface for bitcoin over http endpoints (since bitcoin core doesn't support websockets)
+// Streamer interface for substituting mocks in tests
+type Streamer interface {
+	Stream(payloadChan chan BlockPayload) (*HTTPClientSubscription, error)
+}
+
+// HTTPPayloadStreamer satisfies the PayloadStreamer interface for bitcoin over http endpoints
+// (bitcoin core doesn't support websockets, btcd doesn't support zmq- need to write adapter)
 type HTTPPayloadStreamer struct {
 	Config   *rpcclient.ConnConfig
 	lastHash []byte
@@ -40,8 +44,8 @@ func NewHTTPPayloadStreamer(clientConfig *rpcclient.ConnConfig) *HTTPPayloadStre
 }
 
 // Stream is the main loop for subscribing to data from the btc block notifications
-// Satisfies the shared.PayloadStreamer interface
-func (ps *HTTPPayloadStreamer) Stream(payloadChan chan shared.RawChainData) (shared.ClientSubscription, error) {
+// using only the standard http endpoints shared between bitcoind and btcd nodes
+func (ps *HTTPPayloadStreamer) Stream(payloadChan chan BlockPayload) (*HTTPClientSubscription, error) {
 	logrus.Debug("streaming block payloads from btc")
 	client, err := rpcclient.New(ps.Config, nil)
 	if err != nil {
@@ -87,7 +91,7 @@ func (ps *HTTPPayloadStreamer) Stream(payloadChan chan shared.RawChainData) (sha
 }
 
 // HTTPClientSubscription is a wrapper around the underlying bitcoind rpc client
-// to fit the shared.ClientSubscription interface
+// TODO: use ZMQ from bitcoind or use websockets from btcd
 type HTTPClientSubscription struct {
 	client  *rpcclient.Client
 	errChan chan error

@@ -17,16 +17,19 @@
 package btc
 
 import (
-	"fmt"
-
 	"github.com/sirupsen/logrus"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/postgres"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/shared"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/postgres"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/shared"
 )
+
+// Indexer interface for substituting mocks in tests
+type Indexer interface {
+	Index(cids CIDPayload) error
+}
 
 type CIDIndexer struct {
 	db *postgres.DB
@@ -38,12 +41,7 @@ func NewCIDIndexer(db *postgres.DB) *CIDIndexer {
 	}
 }
 
-func (in *CIDIndexer) Index(cids shared.CIDsForIndexing) error {
-	cidWrapper, ok := cids.(*CIDPayload)
-	if !ok {
-		return fmt.Errorf("btc indexer expected cids type %T got %T", &CIDPayload{}, cids)
-	}
-
+func (in *CIDIndexer) Index(cids CIDPayload) error {
 	// Begin new db tx
 	tx, err := in.db.Beginx()
 	if err != nil {
@@ -60,12 +58,12 @@ func (in *CIDIndexer) Index(cids shared.CIDsForIndexing) error {
 		}
 	}()
 
-	headerID, err := in.indexHeaderCID(tx, cidWrapper.HeaderCID)
+	headerID, err := in.indexHeaderCID(tx, cids.HeaderCID)
 	if err != nil {
 		logrus.Error("btc indexer error when indexing header")
 		return err
 	}
-	err = in.indexTransactionCIDs(tx, cidWrapper.TransactionCIDs, headerID)
+	err = in.indexTransactionCIDs(tx, cids.TransactionCIDs, headerID)
 	if err != nil {
 		logrus.Error("btc indexer error when indexing transactions")
 	}
@@ -109,7 +107,7 @@ func (in *CIDIndexer) indexTransactionCID(tx *sqlx.Tx, transaction TxModelWithIn
 	var txID int64
 	err := tx.QueryRowx(`INSERT INTO btc.transaction_cids (header_id, tx_hash, index, cid, segwit, witness_hash, mh_key)
 							VALUES ($1, $2, $3, $4, $5, $6, $7)
-							ON CONFLICT (tx_hash) DO UPDATE SET (header_id, index, cid, segwit, witness_hash, mh_key) = ($1, $3, $4, $5, $6, $7)
+							ON CONFLICT (header_id, tx_hash) DO UPDATE SET (index, cid, segwit, witness_hash, mh_key) = ($3, $4, $5, $6, $7)
 							RETURNING id`,
 		headerID, transaction.TxHash, transaction.Index, transaction.CID, transaction.SegWit, transaction.WitnessHash, transaction.MhKey).Scan(&txID)
 	return txID, err

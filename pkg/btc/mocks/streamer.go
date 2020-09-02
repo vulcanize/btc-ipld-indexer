@@ -14,27 +14,29 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package version
+package mocks
 
-import "fmt"
-
-const (
-	Major = 0       // Major version component of the current release
-	Minor = 2       // Minor version component of the current release
-	Patch = 0       // Patch version component of the current release
-	Meta  = "alpha" // Version metadata to append to the version string
+import (
+	"github.com/vulcanize/ipld-btc-indexer/pkg/btc"
 )
 
-// Version holds the textual version string.
-var Version = func() string {
-	return fmt.Sprintf("%d.%d.%d", Major, Minor, Patch)
-}()
+// PayloadStreamer mock struct
+type PayloadStreamer struct {
+	PassedPayloadChan chan btc.BlockPayload
+	ReturnSub         *btc.ClientSubscription
+	ReturnErr         error
+	StreamPayloads    []btc.BlockPayload
+}
 
-// VersionWithMeta holds the textual version string including the metadata.
-var VersionWithMeta = func() string {
-	v := Version
-	if Meta != "" {
-		v += "-" + Meta
-	}
-	return v
-}()
+// Stream mock method
+func (sds *PayloadStreamer) Stream(payloadChan chan btc.BlockPayload) (*btc.ClientSubscription, error) {
+	sds.PassedPayloadChan = payloadChan
+
+	go func() {
+		for _, payload := range sds.StreamPayloads {
+			sds.PassedPayloadChan <- payload
+		}
+	}()
+
+	return sds.ReturnSub, sds.ReturnErr
+}

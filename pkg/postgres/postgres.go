@@ -21,8 +21,8 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" //postgres driver
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/config"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/node"
+
+	"github.com/vulcanize/ipld-btc-indexer/pkg/node"
 )
 
 type DB struct {
@@ -31,8 +31,8 @@ type DB struct {
 	NodeID int64
 }
 
-func NewDB(databaseConfig config.Database, node node.Node) (*DB, error) {
-	connectString := config.DbConnectionString(databaseConfig)
+func NewDB(databaseConfig Config, node node.Node) (*DB, error) {
+	connectString := DbConnectionString(databaseConfig)
 	db, connectErr := sqlx.Connect("postgres", connectString)
 	if connectErr != nil {
 		return &DB{}, ErrDBConnectionFailed(connectErr)

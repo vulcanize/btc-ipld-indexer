@@ -19,36 +19,38 @@ package resync
 import (
 	"fmt"
 
+	"github.com/btcsuite/btcd/chaincfg"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/btc"
+
 	"github.com/sirupsen/logrus"
 
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/builders"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/shared"
-	"github.com/vulcanize/ipfs-blockchain-watcher/utils"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/shared"
+	"github.com/vulcanize/ipld-btc-indexer/utils"
 )
 
 type Resync interface {
-	Resync() error
+	Sync() error
 }
 
 type Service struct {
 	// Interface for converting payloads into IPLD object payloads
-	Converter shared.PayloadConverter
+	Converter btc.Converter
 	// Interface for publishing the IPLD payloads to IPFS
-	Publisher shared.IPLDPublisher
+	Publisher btc.Publisher
 	// Interface for searching and retrieving CIDs from Postgres index
-	Retriever shared.CIDRetriever
+	Retriever btc.Retriever
 	// Interface for fetching payloads over at historical blocks; over http
-	Fetcher shared.PayloadFetcher
+	Fetcher btc.Fetcher
 	// Interface for cleaning out data before resyncing (if clearOldCache is on)
-	Cleaner shared.Cleaner
+	Cleaner btc.Cleaner
 	// Size of batch fetches
 	BatchSize uint64
-	// Number of goroutines
-	BatchNumber int64
+	// Number of worker goroutines
+	Workers int64
 	// Channel for receiving quit signal
 	quitChan chan bool
-	// Chain type
-	chain shared.ChainType
+	// Chain config for btc
+	ChainConfig *chaincfg.Params
 	// Resync data type
 	data shared.DataType
 	// Resync ranges
@@ -61,52 +63,34 @@ type Service struct {
 
 // NewResyncService creates and returns a resync service from the provided settings
 func NewResyncService(settings *Config) (Resync, error) {
-	publisher, err := builders.NewIPLDPublisher(settings.Chain, settings.DB)
+	rs := new(Service)
+	var err error
+	rs.ChainConfig = &chaincfg.MainNetParams /// TODO make this configurable
+	rs.Converter = btc.NewPayloadConverter(rs.ChainConfig)
+	rs.Publisher = btc.NewIPLDPublisher(settings.DB)
+	rs.Retriever = btc.NewGapRetriever(settings.DB)
+	rs.Fetcher, err = btc.NewPayloadFetcher(settings.HTTPConfig)
 	if err != nil {
 		return nil, err
 	}
-	converter, err := builders.NewPayloadConverter(settings.Chain, settings.NodeInfo.ChainID)
-	if err != nil {
-		return nil, err
+	rs.Cleaner = btc.NewDBCleaner(settings.DB)
+	rs.BatchSize = settings.BatchSize
+	if rs.BatchSize == 0 {
+		rs.BatchSize = shared.DefaultMaxBatchSize
 	}
-	retriever, err := builders.NewCIDRetriever(settings.Chain, settings.DB)
-	if err != nil {
-		return nil, err
+	rs.Workers = int64(settings.Workers)
+	if rs.Workers == 0 {
+		rs.Workers = shared.DefaultMaxBatchNumber
 	}
-	fetcher, err := builders.NewPaylaodFetcher(settings.Chain, settings.HTTPClient, settings.Timeout)
-	if err != nil {
-		return nil, err
-	}
-	cleaner, err := builders.NewCleaner(settings.Chain, settings.DB)
-	if err != nil {
-		return nil, err
-	}
-	batchSize := settings.BatchSize
-	if batchSize == 0 {
-		batchSize = shared.DefaultMaxBatchSize
-	}
-	batchNumber := int64(settings.BatchNumber)
-	if batchNumber == 0 {
-		batchNumber = shared.DefaultMaxBatchNumber
-	}
-	return &Service{
-		Converter:       converter,
-		Publisher:       publisher,
-		Retriever:       retriever,
-		Fetcher:         fetcher,
-		Cleaner:         cleaner,
-		BatchSize:       batchSize,
-		BatchNumber:     int64(batchNumber),
-		quitChan:        make(chan bool),
-		chain:           settings.Chain,
-		ranges:          settings.Ranges,
-		data:            settings.ResyncType,
-		clearOldCache:   settings.ClearOldCache,
-		resetValidation: settings.ResetValidation,
-	}, nil
+	rs.resetValidation = settings.ResetValidation
+	rs.clearOldCache = settings.ClearOldCache
+	rs.data = settings.ResyncType
+	rs.ranges = settings.Ranges
+	rs.quitChan = make(chan bool)
+	return rs, nil
 }
 
-func (rs *Service) Resync() error {
+func (rs *Service) Sync() error {
 	if rs.resetValidation {
 		logrus.Infof("resetting validation level")
 		if err := rs.Cleaner.ResetValidation(rs.ranges); err != nil {
@@ -116,20 +100,20 @@ func (rs *Service) Resync() error {
 	if rs.clearOldCache {
 		logrus.Infof("cleaning out old data from Postgres")
 		if err := rs.Cleaner.Clean(rs.ranges, rs.data); err != nil {
-			return fmt.Errorf("%s %s data resync cleaning error: %v", rs.chain.String(), rs.data.String(), err)
+			return fmt.Errorf("bitcoin %s data resync cleaning error: %v", rs.data.String(), err)
 		}
 	}
 	// spin up worker goroutines
 	heightsChan := make(chan []uint64)
-	for i := 1; i <= int(rs.BatchNumber); i++ {
+	for i := 1; i <= int(rs.Workers); i++ {
 		go rs.resync(i, heightsChan)
 	}
 	for _, rng := range rs.ranges {
 		if rng[1] < rng[0] {
-			logrus.Errorf("%s resync range ending block number needs to be greater than the starting block number", rs.chain.String())
+			logrus.Error("bitcoin resync range ending block number needs to be greater than the starting block number")
 			continue
 		}
-		logrus.Infof("resyncing %s data from %d to %d", rs.chain.String(), rng[0], rng[1])
+		logrus.Infof("resyncing bitcoin data from %d to %d", rng[0], rng[1])
 		// break the range up into bins of smaller ranges
 		blockRangeBins, err := utils.GetBlockHeightBins(rng[0], rng[1], rs.BatchSize)
 		if err != nil {
@@ -141,7 +125,7 @@ func (rs *Service) Resync() error {
 	}
 	// send a quit signal to each worker
 	// this blocks until each worker has finished its current task and can receive from the quit channel
-	for i := 1; i <= int(rs.BatchNumber); i++ {
+	for i := 1; i <= int(rs.Workers); i++ {
 		rs.quitChan <- true
 	}
 	return nil
@@ -151,23 +135,23 @@ func (rs *Service) resync(id int, heightChan chan []uint64) {
 	for {
 		select {
 		case heights := <-heightChan:
-			logrus.Debugf("%s resync worker %d processing section from %d to %d", rs.chain.String(), id, heights[0], heights[len(heights)-1])
+			logrus.Debugf("bitcoin resync worker %d processing section from %d to %d", id, heights[0], heights[len(heights)-1])
 			payloads, err := rs.Fetcher.FetchAt(heights)
 			if err != nil {
-				logrus.Errorf("%s resync worker %d fetcher error: %s", rs.chain.String(), id, err.Error())
+				logrus.Errorf("bitcoin resync worker %d fetcher error: %s", id, err.Error())
 			}
 			for _, payload := range payloads {
 				ipldPayload, err := rs.Converter.Convert(payload)
 				if err != nil {
-					logrus.Errorf("%s resync worker %d converter error: %s", rs.chain.String(), id, err.Error())
+					logrus.Errorf("bitcoin resync worker %d converter error: %s", id, err.Error())
 				}
-				if err := rs.Publisher.Publish(ipldPayload); err != nil {
-					logrus.Errorf("%s resync worker %d publisher error: %s", rs.chain.String(), id, err.Error())
+				if err := rs.Publisher.Publish(*ipldPayload); err != nil {
+					logrus.Errorf("bitcoin resync worker %d publisher error: %s", id, err.Error())
 				}
 			}
-			logrus.Infof("%s resync worker %d finished section from %d to %d", rs.chain.String(), id, heights[0], heights[len(heights)-1])
+			logrus.Infof("bitcoin resync worker %d finished section from %d to %d", id, heights[0], heights[len(heights)-1])
 		case <-rs.quitChan:
-			logrus.Infof("%s resync worker %d goroutine shutting down", rs.chain.String(), id)
+			logrus.Infof("bitcoin resync worker %d goroutine shutting down", id)
 			return
 		}
 	}

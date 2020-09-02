@@ -14,28 +14,35 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package btc_test
+package postgres_test
 
 import (
-	"github.com/btcsuite/btcd/chaincfg"
+	"bytes"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
-	"github.com/vulcanize/ipld-btc-indexer/pkg/btc"
-	"github.com/vulcanize/ipld-btc-indexer/pkg/btc/mocks"
+	"github.com/spf13/viper"
 )
 
-var _ = Describe("Converter", func() {
-	Describe("Convert", func() {
-		It("Converts mock BlockPayloads into the expected IPLDPayloads", func() {
-			converter := btc.NewPayloadConverter(&chaincfg.MainNetParams)
-			payload, err := converter.Convert(mocks.MockBlockPayload)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(payload).To(Equal(&mocks.MockConvertedPayload))
-			Expect(payload.BlockHeight).To(Equal(mocks.MockBlockHeight))
-			Expect(payload.Header).To(Equal(&mocks.MockBlock.Header))
-			Expect(payload.Txs).To(Equal(mocks.MockTransactions))
-			Expect(payload.TxMetaData).To(Equal(mocks.MockTxsMetaData))
-		})
+var vulcanizeConfig = []byte(`
+[database]
+name = "dbname"
+hostname = "localhost"
+port = 5432
+`)
+
+var _ = Describe("Loading the config", func() {
+	It("reads the private config using the environment", func() {
+		viper.SetConfigName("config")
+		viper.AddConfigPath("$GOPATH/src/github.com/vulcanize/ipld-btc-indexer/environments/")
+
+		testConfig := viper.New()
+		testConfig.SetConfigType("toml")
+		err := testConfig.ReadConfig(bytes.NewBuffer(vulcanizeConfig))
+		Expect(err).To(BeNil())
+		Expect(testConfig.Get("database.hostname")).To(Equal("localhost"))
+		Expect(testConfig.Get("database.name")).To(Equal("dbname"))
+		Expect(testConfig.Get("database.port")).To(Equal(int64(5432)))
 	})
+
 })

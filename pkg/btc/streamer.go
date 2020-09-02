@@ -21,29 +21,27 @@ import (
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
 	"github.com/sirupsen/logrus"
-
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/shared"
 )
 
 const (
 	PayloadChanBufferSize = 20000 // the max eth sub buffer size
 )
 
-// PayloadStreamer satisfies the PayloadStreamer interface for bitcoin
-type PayloadStreamer struct {
+// WSPayloadStreamer satisfies the PayloadStreamer interface for bitcoin using btcd's websocket endpoints
+type WSPayloadStreamer struct {
 	Config *rpcclient.ConnConfig
 }
 
-// NewPayloadStreamer creates a pointer to a new PayloadStreamer which satisfies the PayloadStreamer interface for bitcoin
-func NewPayloadStreamer(clientConfig *rpcclient.ConnConfig) *PayloadStreamer {
-	return &PayloadStreamer{
+// NewWSPayloadStreamer creates a pointer to a new WSPayloadStreamer
+func NewWSPayloadStreamer(clientConfig *rpcclient.ConnConfig) *WSPayloadStreamer {
+	return &WSPayloadStreamer{
 		Config: clientConfig,
 	}
 }
 
 // Stream is the main loop for subscribing to data from the btc block notifications
-// Satisfies the shared.PayloadStreamer interface
-func (ps *PayloadStreamer) Stream(payloadChan chan shared.RawChainData) (shared.ClientSubscription, error) {
+// This only works against btcd's websocket endpoints
+func (ps *WSPayloadStreamer) Stream(payloadChan chan BlockPayload) (*ClientSubscription, error) {
 	logrus.Info("streaming block payloads from btc")
 	blockNotificationHandler := rpcclient.NotificationHandlers{
 		// Notification handler for block connections, forwards new block data to the payloadChan
@@ -69,7 +67,6 @@ func (ps *PayloadStreamer) Stream(payloadChan chan shared.RawChainData) (shared.
 }
 
 // ClientSubscription is a wrapper around the underlying btcd rpc client
-// to fit the shared.ClientSubscription interface
 type ClientSubscription struct {
 	client *rpcclient.Client
 }

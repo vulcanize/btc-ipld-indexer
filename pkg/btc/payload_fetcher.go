@@ -22,9 +22,12 @@ import (
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
-
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/shared"
 )
+
+// Fetcher interface for substituting mocks in tests
+type Fetcher interface {
+	FetchAt(blockHeights []uint64) ([]BlockPayload, error)
+}
 
 // PayloadFetcher satisfies the PayloadFetcher interface for bitcoin
 type PayloadFetcher struct {
@@ -45,8 +48,8 @@ func NewPayloadFetcher(c *rpcclient.ConnConfig) (*PayloadFetcher, error) {
 }
 
 // FetchAt fetches the block payloads at the given block heights
-func (fetcher *PayloadFetcher) FetchAt(blockHeights []uint64) ([]shared.RawChainData, error) {
-	blockPayloads := make([]shared.RawChainData, len(blockHeights))
+func (fetcher *PayloadFetcher) FetchAt(blockHeights []uint64) ([]BlockPayload, error) {
+	blockPayloads := make([]BlockPayload, len(blockHeights))
 	for i, height := range blockHeights {
 		hash, err := fetcher.client.GetBlockHash(int64(height))
 		if err != nil {

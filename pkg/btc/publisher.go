@@ -17,13 +17,17 @@
 package btc
 
 import (
-	"fmt"
 	"strconv"
 
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/ipfs/ipld"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/postgres"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/shared"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/ipfs/ipld"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/postgres"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/shared"
 )
+
+// Publisher interface for substituting mocks in tests
+type Publisher interface {
+	Publish(payload ConvertedPayload) error
+}
 
 // IPLDPublisher satisfies the IPLDPublisher interface for bitcoin
 // It interfaces directly with the public.blocks table of PG-IPFS rather than going through an ipfs intermediary
@@ -40,13 +44,9 @@ func NewIPLDPublisher(db *postgres.DB) *IPLDPublisher {
 }
 
 // Publish publishes an IPLDPayload to IPFS and returns the corresponding CIDPayload
-func (pub *IPLDPublisher) Publish(payload shared.ConvertedData) error {
-	ipldPayload, ok := payload.(ConvertedPayload)
-	if !ok {
-		return fmt.Errorf("btc publisher expected payload type %T got %T", ConvertedPayload{}, payload)
-	}
+func (pub *IPLDPublisher) Publish(payload ConvertedPayload) error {
 	// Generate the iplds
-	headerNode, txNodes, txTrieNodes, err := ipld.FromHeaderAndTxs(ipldPayload.Header, ipldPayload.Txs)
+	headerNode, txNodes, txTrieNodes, err := ipld.FromHeaderAndTxs(payload.Header, payload.Txs)
 	if err != nil {
 		return err
 	}
@@ -81,11 +81,11 @@ func (pub *IPLDPublisher) Publish(payload shared.ConvertedData) error {
 	header := HeaderModel{
 		CID:         headerNode.Cid().String(),
 		MhKey:       shared.MultihashKeyFromCID(headerNode.Cid()),
-		ParentHash:  ipldPayload.Header.PrevBlock.String(),
-		BlockNumber: strconv.Itoa(int(ipldPayload.BlockPayload.BlockHeight)),
-		BlockHash:   ipldPayload.Header.BlockHash().String(),
-		Timestamp:   ipldPayload.Header.Timestamp.UnixNano(),
-		Bits:        ipldPayload.Header.Bits,
+		ParentHash:  payload.Header.PrevBlock.String(),
+		BlockNumber: strconv.Itoa(int(payload.BlockPayload.BlockHeight)),
+		BlockHash:   payload.Header.BlockHash().String(),
+		Timestamp:   payload.Header.Timestamp.UnixNano(),
+		Bits:        payload.Header.Bits,
 	}
 	headerID, err := pub.indexer.indexHeaderCID(tx, header)
 	if err != nil {
@@ -97,7 +97,7 @@ func (pub *IPLDPublisher) Publish(payload shared.ConvertedData) error {
 		if err := shared.PublishIPLD(tx, txNode); err != nil {
 			return err
 		}
-		txModel := ipldPayload.TxMetaData[i]
+		txModel := payload.TxMetaData[i]
 		txModel.CID = txNode.Cid().String()
 		txModel.MhKey = shared.MultihashKeyFromCID(txNode.Cid())
 		txID, err := pub.indexer.indexTransactionCID(tx, txModel, headerID)

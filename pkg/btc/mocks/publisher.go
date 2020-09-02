@@ -17,49 +17,30 @@
 package mocks
 
 import (
-	"fmt"
-
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/btc"
-
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/shared"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/btc"
 )
 
 // IPLDPublisher is the underlying struct for the Publisher interface
 type IPLDPublisher struct {
 	PassedIPLDPayload btc.ConvertedPayload
-	ReturnCIDPayload  *btc.CIDPayload
 	ReturnErr         error
 }
 
 // Publish publishes an IPLDPayload to IPFS and returns the corresponding CIDPayload
-func (pub *IPLDPublisher) Publish(payload shared.ConvertedData) (shared.CIDsForIndexing, error) {
-	ipldPayload, ok := payload.(btc.ConvertedPayload)
-	if !ok {
-		return nil, fmt.Errorf("publish expected payload type %T got %T", &btc.ConvertedPayload{}, payload)
-	}
-	pub.PassedIPLDPayload = ipldPayload
-	return pub.ReturnCIDPayload, pub.ReturnErr
+func (pub *IPLDPublisher) Publish(payload btc.ConvertedPayload) error {
+	pub.PassedIPLDPayload = payload
+	return pub.ReturnErr
 }
 
 // IterativeIPLDPublisher is the underlying struct for the Publisher interface; used in testing
 type IterativeIPLDPublisher struct {
 	PassedIPLDPayload []btc.ConvertedPayload
-	ReturnCIDPayload  []*btc.CIDPayload
 	ReturnErr         error
 	iteration         int
 }
 
 // Publish publishes an IPLDPayload to IPFS and returns the corresponding CIDPayload
-func (pub *IterativeIPLDPublisher) Publish(payload shared.ConvertedData) (shared.CIDsForIndexing, error) {
-	ipldPayload, ok := payload.(btc.ConvertedPayload)
-	if !ok {
-		return nil, fmt.Errorf("publish expected payload type %T got %T", &btc.ConvertedPayload{}, payload)
-	}
-	pub.PassedIPLDPayload = append(pub.PassedIPLDPayload, ipldPayload)
-	if len(pub.ReturnCIDPayload) < pub.iteration+1 {
-		return nil, fmt.Errorf("IterativeIPLDPublisher does not have a payload to return at iteration %d", pub.iteration)
-	}
-	returnPayload := pub.ReturnCIDPayload[pub.iteration]
-	pub.iteration++
-	return returnPayload, pub.ReturnErr
+func (pub *IterativeIPLDPublisher) Publish(payload btc.ConvertedPayload) error {
+	pub.PassedIPLDPayload = append(pub.PassedIPLDPayload, payload)
+	return pub.ReturnErr
 }

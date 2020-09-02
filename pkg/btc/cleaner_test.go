@@ -23,9 +23,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/btc"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/postgres"
-	"github.com/vulcanize/ipfs-blockchain-watcher/pkg/shared"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/btc"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/postgres"
+	"github.com/vulcanize/ipld-btc-indexer/pkg/shared"
 )
 
 var (
@@ -137,14 +137,14 @@ var _ = Describe("Cleaner", func() {
 	var (
 		db      *postgres.DB
 		repo    *btc.CIDIndexer
-		cleaner *btc.Cleaner
+		cleaner *btc.DBCleaner
 	)
 	BeforeEach(func() {
 		var err error
 		db, err = shared.SetupDB()
 		Expect(err).ToNot(HaveOccurred())
 		repo = btc.NewCIDIndexer(db)
-		cleaner = btc.NewCleaner(db)
+		cleaner = btc.NewDBCleaner(db)
 	})
 
 	Describe("Clean", func() {
@@ -153,9 +153,9 @@ var _ = Describe("Cleaner", func() {
 				_, err := db.Exec(`INSERT INTO public.blocks (key, data) VALUES ($1, $2)`, key, mockData)
 				Expect(err).ToNot(HaveOccurred())
 			}
-			err := repo.Index(mockCIDPayload1)
+			err := repo.Index(*mockCIDPayload1)
 			Expect(err).ToNot(HaveOccurred())
-			err = repo.Index(mockCIDPayload2)
+			err = repo.Index(*mockCIDPayload2)
 			Expect(err).ToNot(HaveOccurred())
 
 			tx, err := db.Beginx()
@@ -300,11 +300,10 @@ var _ = Describe("Cleaner", func() {
 				Expect(err).ToNot(HaveOccurred())
 			}
 
-			err := repo.Index(mockCIDPayload1)
+			err := repo.Index(*mockCIDPayload1)
 			Expect(err).ToNot(HaveOccurred())
-			err = repo.Index(mockCIDPayload2)
+			err = repo.Index(*mockCIDPayload2)
 			Expect(err).ToNot(HaveOccurred())
-
 			var validationTimes []int
 			pgStr := `SELECT times_validated FROM btc.header_cids`
 			err = db.Select(&validationTimes, pgStr)
@@ -313,7 +312,7 @@ var _ = Describe("Cleaner", func() {
 			Expect(validationTimes[0]).To(Equal(1))
 			Expect(validationTimes[1]).To(Equal(1))
 
-			err = repo.Index(mockCIDPayload1)
+			err = repo.Index(*mockCIDPayload1)
 			Expect(err).ToNot(HaveOccurred())
 
 			validationTimes = []int{}
@@ -339,7 +338,7 @@ var _ = Describe("Cleaner", func() {
 			Expect(validationTimes[0]).To(Equal(0))
 			Expect(validationTimes[1]).To(Equal(0))
 
-			err = repo.Index(mockCIDPayload2)
+			err = repo.Index(*mockCIDPayload2)
 			Expect(err).ToNot(HaveOccurred())
 
 			validationTimes = []int{}
