@@ -145,7 +145,19 @@ The corresponding CLI flags can be found with the `./ipld-btc-indexer {command} 
 `backfill` and `resync` require only an `bitcoin.httpPath` while `sync` requires only an `bitcoin.wsPath`.
 
 ### Exposing the data
-See [ipld-btc-server](https://github.com/vulcanize/ipld-btc-server)
+* Use [ipld-btc-server](https://github.com/vulcanize/ipld-btc-server) to expose standard btc JSON RPC endpoints as well as unique ones
+* Use [Postgraphile](https://www.graphile.org/postgraphile/) to expose GraphQL endpoints on top of the Postgres tables
+
+e.g.
+
+`postgraphile --plugins @graphile/pg-pubsub --subscriptions --simple-subscriptions -c postgres://localhost:5432/vulcanize_public?sslmode=disable -s public,btc -a -j`
+
+
+This will stand up a Postgraphile server on the public and btc schemas- exposing GraphQL endpoints for all of the tables contained under those schemas.
+All of their data can then be queried with standard [GraphQL](https://graphql.org) queries.
+
+* Use PG-IPFS to expose the raw IPLD data. More information on how to stand up an IPFS node on top
+of Postgres can be found [here](./documentation/ipfs.md)
 
 ### Testing
 `make test` will run the unit tests  

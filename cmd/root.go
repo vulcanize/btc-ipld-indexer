@@ -111,11 +111,11 @@ func init() {
 	viper.BindPFlag("logfile", rootCmd.PersistentFlags().Lookup("logfile"))
 	viper.BindPFlag("log.level", rootCmd.PersistentFlags().Lookup("log-level"))
 
-	viper.BindPFlag("bitcoin.nodeID", backfillCmd.PersistentFlags().Lookup("btc-node-id"))
-	viper.BindPFlag("bitcoin.clientName", backfillCmd.PersistentFlags().Lookup("btc-client-name"))
-	viper.BindPFlag("bitcoin.genesisBlock", backfillCmd.PersistentFlags().Lookup("btc-genesis-block"))
-	viper.BindPFlag("bitcoin.networkID", backfillCmd.PersistentFlags().Lookup("btc-network-id"))
-	viper.BindPFlag("bitcoin.chainID", backfillCmd.PersistentFlags().Lookup("btc-chain-id"))
+	viper.BindPFlag("bitcoin.nodeID", rootCmd.PersistentFlags().Lookup("btc-node-id"))
+	viper.BindPFlag("bitcoin.clientName", rootCmd.PersistentFlags().Lookup("btc-client-name"))
+	viper.BindPFlag("bitcoin.genesisBlock", rootCmd.PersistentFlags().Lookup("btc-genesis-block"))
+	viper.BindPFlag("bitcoin.networkID", rootCmd.PersistentFlags().Lookup("btc-network-id"))
+	viper.BindPFlag("bitcoin.chainID", rootCmd.PersistentFlags().Lookup("btc-chain-id"))
 }
 
 func initConfig() {
