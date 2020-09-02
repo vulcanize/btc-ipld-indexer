@@ -2,28 +2,28 @@
     name     = "vulcanize_public" # $DATABASE_NAME
     hostname = "localhost" # $DATABASE_HOSTNAME
     port     = 5432 # $DATABASE_PORT
-    user     = "vdbm" # $DATABASE_USER
+    user     = "postgres" # $DATABASE_USER
     password = "" # $DATABASE_PASSWORD
 
 [log]
-    level = "debug" # $LOGRUS_LEVEL
+    level = "info" # $LOGRUS_LEVEL
 
 [sync]
-    workers = 1 # $SUPERNODE_WORKERS
+    workers = 4 # $SYNC_WORKERS
 
 [backfill]
-    frequency = 45 # $BACKFILL_FREQUENCY
-    batchSize = 1 # $BACKFILL_BATCH_SIZE
-    workers = 5 # $BACKFILL_WORKERS
-    validationLevel = 1 # $BACKFILL_VALIDATION_LEVEL
+    frequency = 15 # $BACKFILL_FREQUENCY
+    batchSize = 2 # $BACKFILL_BATCH_SIZE
+    workers = 4 # $BACKFILL_WORKERS
     timeout = 300 # $HTTP_TIMEOUT
+    validationLevel = 1 # $BACKFILL_VALIDATION_LEVEL
 
 [resync]
     type = "full" # $RESYNC_TYPE
     start = 0 # $RESYNC_START
     stop = 0 # $RESYNC_STOP
-    batchSize = 1 # $RESYNC_BATCH_SIZE
-    workers = 5 # $RESYNC_WORKERS
+    batchSize = 2 # $RESYNC_BATCH_SIZE
+    workers = 4 # $RESYNC_WORKERS
     timeout = 300 # $HTTP_TIMEOUT
     clearOldCache = false # $RESYNC_CLEAR_OLD_CACHE
     resetValidation = false # $RESYNC_RESET_VALIDATION

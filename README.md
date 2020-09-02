@@ -62,7 +62,7 @@ Any of the standard full nodes can be used (e.g. bitcoind, btcd) as the data sou
 Point at a remote node or set one up locally using the instructions for [bitcoind](https://github.com/bitcoin/bitcoin) and [btcd](https://github.com/btcsuite/btcd).
 
 The default http url is "127.0.0.1:8332". We will use the http endpoint as both the `bitcoin.wsPath` and `bitcoin.httpPath`
-(bitcoind does not support websocket endpoints, the watcher currently uses a "subscription" wrapper around the http endpoints)
+(bitcoind does not support websocket endpoints, the watcher currently uses a "subscription" wrapper around the http endpoints; TODO: use ws for btcd and zmq for bitcoind)
 
 ### Indexer
 Finally, setup the indexer process itself.
