@@ -96,10 +96,10 @@ func init() {
 	rootCmd.PersistentFlags().String("logfile", "", "file path for logging")
 
 	rootCmd.PersistentFlags().String("btc-node-id", "", "btc node id")
-	rootCmd.PersistentFlags().String("btc-client-name", "", "btc client name")
-	rootCmd.PersistentFlags().String("btc-genesis-block", "", "btc genesis block hash")
-	rootCmd.PersistentFlags().String("btc-network-id", "", "btc network id")
-	rootCmd.PersistentFlags().String("btc-chain-id", "", "btc chain id")
+	rootCmd.PersistentFlags().String("btc-client-name", "bitcoind", "btc client name")
+	rootCmd.PersistentFlags().String("btc-genesis-block", "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f", "btc genesis block hash")
+	rootCmd.PersistentFlags().String("btc-network-id", "0xD9B4BEF9", "btc network id")
+	rootCmd.PersistentFlags().String("btc-chain-id", "1", "btc chain id")
 
 	// and their .toml config bindings
 	viper.BindPFlag("database.name", rootCmd.PersistentFlags().Lookup("database-name"))
